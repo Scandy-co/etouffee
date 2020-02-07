@@ -75,10 +75,15 @@ find_package(
 )
 include_directories(${Roux_INCLUDE_DIRS})
 
+
 # Make sure we've got Qt setup
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
+if(LINUX)
+  set(Qt5_DIR "/usr/lib/x86_64-linux-gnu/")
+elseif(APPLE)
+  set(Qt5_DIR "/usr/local/Cellar/qt/5.13.2/lib/cmake/Qt5/")
+endif()
+find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED)
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # Setup the Qt project
 set(project_sources ${Etouffee_SOURCE_DIR}/main.cpp ${Etouffee_SOURCE_DIR}/mainwindow.cpp)
