@@ -42,6 +42,10 @@ protected slots:
   void on_stopButton_clicked();
   void on_meshButton_clicked();
   void on_saveButton_clicked();
+  void on_scanSize_valueChanged(double arg1);
+  void on_voxelSize_valueChanged(double arg1);
+  void on_scannerType_currentIndexChanged(int index);
+  void on_v2ScanMode_stateChanged(int arg1);
 };
 
 #endif // MAINWINDOW_H
