@@ -23,12 +23,6 @@
 #include <QtWidgets>
 #include <iostream>
 
-#if LINUX
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
-#endif
-
 #include <QVTKOpenGLNativeWidget.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkNew.h>
@@ -39,6 +33,14 @@
 #include <scandy/core/IScandyCore.h>
 #include <scandy/core/MeshExportOptions.h>
 #include <scandy/core/ScannerType.h>
+
+
+// These need to be last since Xlib.h #define Status 1
+#if LINUX
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glx.h>
+#endif
 
 using namespace scandy::core;
 using namespace scandy::utilities;
@@ -142,8 +144,8 @@ void
 MainWindow::on_initButton_clicked()
 {
   std::cout << "on_initButton_clicked" << std::endl;
-  ScannerType scanner_type = ScannerType::FILE;
-  std::string dir_path = "/tmp/etouffe_input/";
+  ScannerType scanner_type = ScannerType::INUITIVE;
+  std::string dir_path = "";
   auto status = m_roux->initializeScanner(scanner_type, dir_path);
   std::cout << "init " << getStatusString(status) << std::endl;
 }
