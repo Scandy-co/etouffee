@@ -28,6 +28,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   cmake_policy(SET CMP0079 NEW)
 endif()
 
+# Use clang. Must be set before project
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CC_COMPILER "clang")
