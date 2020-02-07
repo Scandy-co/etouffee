@@ -52,6 +52,7 @@ compile_commands.json
 *creator.user*
 
 # Assets libs deps etc
+.vscode/
 *.zip
 *.tar*
 dependencies/
