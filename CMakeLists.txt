@@ -40,10 +40,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fpermissive -Werror=return-t
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
 
-# NOTE: hack to make Linux honor c++14
-set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++14")
-set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=c++14")
-
 find_package(OpenGL)
 find_package(GLUT)
 find_package(GLEW)
@@ -51,22 +47,6 @@ include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 
 if(GLUT_INCLUDE_DIR)
   include_directories(${GLUT_INCLUDE_DIR})
-endif()
-
-# Roux does not package OpenCV for Apple currently
-if(APPLE)
-  find_package(OpenCV)
-  include_directories(${OpenCV_INCLUDE_DIRS})
-endif()
-
-# Check if we need OpenCL
-if( LINUX )
-  find_package(OpenCL REQUIRED )
-  include_directories(${OpenCL_INCLUDE_DIRS})
-  link_directories(${OpenCL_LIBRARY})
-  # Overwrite OpenCL libs to include OpenGL
-  set(OpenCL_LIBRARIES ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES})
-  include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
 find_package(
@@ -102,6 +82,9 @@ add_definitions(-DDEPS_DIR_PATH="${Etouffee_SOURCE_DIR}/dependencies/")
 
 # Setup the Etouffee App
 if( APPLE )
+  find_package(OpenCV)
+  include_directories(${OpenCV_INCLUDE_DIRS})
+
   # make a MACOSX_BUNDLE so we can use this with Xcode
   add_executable(EtouffeeApp MACOSX_BUNDLE
     ${project_sources}
@@ -122,22 +105,24 @@ if( APPLE )
     "-framework CoreGraphics"
     "-framework CoreVideo"
   )
-  if(ENABLE_OPENCL)
-    list(APPEND APPLE_LIBS "-framework OpenCL")
-  endif()
-  if(ENABLE_METAL)
-    list(APPEND APPLE_LIBS "-framework Metal")
-  endif()
+  list(APPEND APPLE_LIBS "-framework Metal")
   target_link_libraries(EtouffeeApp ${APPLE_LIBS})
 
   # Set the executable path APPLE
   set(QMAKE_LFLAGS_SONAME="-Wl,-install_name,@executable_path/")
-else ()
+else()
+  find_package(OpenCL REQUIRED )
+  include_directories(${OpenCL_INCLUDE_DIRS})
+
   add_executable(EtouffeeApp
     ${project_sources}
     ${project_header}
     ${ui_wrap}
     ${moc_sources}
+  )
+  target_link_libraries( EtouffeeApp
+    ${OpenCL_LIBRARIES}
+    ${OPENGL_LIBRARIES}
   )
 endif()
 
