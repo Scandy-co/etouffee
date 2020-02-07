@@ -46,6 +46,8 @@ using namespace scandy::core;
 using namespace scandy::utilities;
 
 std::shared_ptr<scandy::core::IScandyCore> m_roux;
+std::shared_ptr<scandy::core::IScandyCoreConfiguration> m_sc_config;
+
 // VTK must be rendered from main user interface thread
 QTimer* m_render_timer;
 const int m_render_timeout_ms = 25;
@@ -115,6 +117,8 @@ MainWindow::setupRoux()
   ui->rouxWidget->SetRenderWindow(renderWindow);
   m_roux = IScandyCore::factoryCreate(width, height, ui->rouxWidget);
 
+  m_sc_config = m_roux->getIScandyCoreConfiguration();
+
   // setup timer to update window every 25ms
   // remember vtk must be update in main ui thread
   if (m_render_timer != nullptr) {
@@ -146,6 +150,12 @@ MainWindow::on_initButton_clicked()
   std::cout << "on_initButton_clicked" << std::endl;
   ScannerType scanner_type = ScannerType::INUITIVE;
   std::string dir_path = "";
+  // TODO: Get from combo box
+  //scanner_type = ScannerType::FILE;
+  //dir_path = "/tmp/etouffe_input/";
+
+  m_sc_config->m_use_unbounded = ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
+
   auto status = m_roux->initializeScanner(scanner_type, dir_path);
   std::cout << "init " << getStatusString(status) << std::endl;
 }
@@ -190,4 +200,27 @@ MainWindow::on_saveButton_clicked()
   opts.m_dst_file_path = "/tmp/etouffee.ply";
   auto status = m_roux->exportMesh(opts);
   std::cout << "save " << getStatusString(status) << std::endl;
+}
+
+void
+MainWindow::on_scanSize_valueChanged(double arg1)
+{
+  m_roux->setScanSize((float)arg1);
+}
+
+void
+MainWindow::on_voxelSize_valueChanged(double arg1)
+{
+  m_roux->setVoxelSize((float)arg1);
+}
+
+void
+MainWindow::on_scannerType_currentIndexChanged(int index)
+{
+  std::cout << "on_scannerType_currentIndexChanged: " << index << std::endl;
+}
+
+void MainWindow::on_v2ScanMode_stateChanged(int arg1)
+{
+    m_sc_config->m_use_unbounded = ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
 }

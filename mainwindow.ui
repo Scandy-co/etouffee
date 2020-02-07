@@ -20,7 +20,7 @@
       <x>0</x>
       <y>0</y>
       <width>1026</width>
-      <height>688</height>
+      <height>730</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -47,7 +47,7 @@
           <x>0</x>
           <y>0</y>
           <width>200</width>
-          <height>684</height>
+          <height>726</height>
          </rect>
         </property>
         <property name="maximumSize">
@@ -56,45 +56,164 @@
           <height>16777215</height>
          </size>
         </property>
-        <widget class="QWidget" name="verticalLayoutWidget">
+        <widget class="QWidget" name="formLayoutWidget">
          <property name="geometry">
           <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>201</width>
-           <height>681</height>
+           <x>10</x>
+           <y>10</y>
+           <width>191</width>
+           <height>321</height>
           </rect>
          </property>
-         <layout class="QVBoxLayout" name="paramsLayout">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QFormLayout" name="formLayout">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Voxel MM</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="voxelSize">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>5.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>V1 size m</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="scanSize">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.200000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.500000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="v2ScanMode">
+            <property name="text">
+             <string>V2 Scan</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Near plane</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="doubleSpinBox">
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.300000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Far plane</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.500000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QComboBox" name="scannerType">
             <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Scan Size</string>
-              </property>
-             </widget>
+             <property name="text">
+              <string>File</string>
+             </property>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBox">
-              <property name="decimals">
-               <number>3</number>
-              </property>
-              <property name="minimum">
-               <double>0.200000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>10.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.500000000000000</double>
-              </property>
-             </widget>
+             <property name="text">
+              <string>Inuitive</string>
+             </property>
             </item>
-           </layout>
+            <item>
+             <property name="text">
+              <string>pico flexx</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Network</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>OpenNI</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Real Sense</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>ScannerType</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -143,16 +262,16 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="meshButton">
+          <widget class="QPushButton" name="stopButton">
            <property name="text">
-            <string>Mesh</string>
+            <string>Stop</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="stopButton">
+          <widget class="QPushButton" name="meshButton">
            <property name="text">
-            <string>Stop</string>
+            <string>Mesh</string>
            </property>
           </widget>
          </item>
