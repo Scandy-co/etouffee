@@ -19,9 +19,8 @@
 #include "ui_mainwindow.h"
 
 #include <QGLContext>
-#include <QtWidgets>
-
 #include <QOpenGLWidget>
+#include <QtWidgets>
 #include <iostream>
 
 #if LINUX
@@ -35,6 +34,8 @@
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
+#include <scandy/utilities/FileOps.h>
+
 #include <scandy/core/IScandyCore.h>
 #include <scandy/core/MeshExportOptions.h>
 #include <scandy/core/ScannerType.h>
@@ -42,7 +43,7 @@
 using namespace scandy::core;
 using namespace scandy::utilities;
 
-std::shared_ptr<IScandyCore> m_roux;
+std::shared_ptr<scandy::core::IScandyCore> m_roux;
 // VTK must be rendered from main user interface thread
 QTimer* m_render_timer;
 const int m_render_timeout_ms = 25;
@@ -121,6 +122,20 @@ MainWindow::setupRoux()
   m_render_timer = new QTimer(this);
   connect(m_render_timer, SIGNAL(timeout()), this, SLOT(slotRender()));
   m_render_timer->start(m_render_timeout_ms);
+
+  // Read the license from file
+  std::string license_path = DEPS_DIR_PATH "/roux_license.txt";
+  std::string license_str =
+    (char*)FileOps::ReadDataFromFile<uchar>(license_path).data();
+  // Remove the new line characters
+  license_str.erase(std::remove(license_str.begin(), license_str.end(), '\n'),
+                    license_str.end());
+  m_roux->setLicense(license_str);
+  std::string model_path = DEPS_DIR_PATH "/models/scandy-4.obj";
+  std::string texture_path = DEPS_DIR_PATH "/models/scandy-texture-4.png";
+  if (FileOps::FileExists(model_path)) {
+    m_roux->loadMesh(model_path, texture_path);
+  }
 }
 
 void

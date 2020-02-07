@@ -84,6 +84,9 @@ include_directories(${Etouffee_SOURCE_DIR} ${Etouffee_BINARY_DIR})
 qt5_wrap_ui(ui_wrap ${project_ui})
 qt5_wrap_cpp(moc_sources ${project_headers})
 
+# Define the path to dependencies dir
+add_definitions(-DDEPS_DIR_PATH="${Etouffee_SOURCE_DIR}/dependencies/")
+
 # Setup the Etouffee App
 if( APPLE )
   # make a MACOSX_BUNDLE so we can use this with Xcode
