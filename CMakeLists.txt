@@ -28,6 +28,10 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   cmake_policy(SET CMP0079 NEW)
 endif()
 
+set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_C_COMPILER "clang")
+set(CMAKE_CC_COMPILER "clang")
+
 project(Etouffee)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -35,6 +39,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fpermissive -Werror=return-t
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
 
+# NOTE: hack to make Linux honor c++14
+set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++14")
+set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=c++14")
 
 find_package(OpenGL)
 find_package(GLUT)
