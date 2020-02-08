@@ -41,6 +41,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glx.h>
+#undef Status
 #endif
 
 using namespace scandy::core;
@@ -140,7 +141,7 @@ MainWindow::setupRoux()
   std::cout << "Setting license to: " << license_path << ":\n\t" << license_str
             << std::endl;
   auto status = m_roux->setLicense(license_str);
-  if (status != Status::SUCCESS) {
+  if (status != scandy::core::Status::SUCCESS) {
     std::cerr << "Error setting Roux License!" << getStatusString(status)
               << std::endl;
   }
@@ -162,15 +163,13 @@ void
 MainWindow::on_initButton_clicked()
 {
   std::cout << "on_initButton_clicked" << std::endl;
-  // Get from combo box
-  ScannerType scanner_type = ScannerType::FILE;
   std::string dir_path = m_sc_config->m_scan_dir_path;
   m_sc_config->m_scan_dir_path = "/tmp/etouffe";
 
   m_sc_config->m_use_unbounded =
     ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
 
-  auto status = m_roux->initializeScanner(scanner_type, dir_path);
+  auto status = m_roux->initializeScanner(m_sc_config->m_scanner_type, dir_path);
   std::cout << "init " << getStatusString(status) << std::endl;
 }
 
@@ -203,6 +202,8 @@ MainWindow::on_meshButton_clicked()
 {
   std::cout << "on_meshButton_clicked" << std::endl;
   auto status = m_roux->generateMesh();
+  m_roux->smoothMesh(3);
+  m_roux->reverseNormals();
   std::cout << "mesh " << getStatusString(status) << std::endl;
 }
 
