@@ -46,6 +46,10 @@ protected slots:
   void on_voxelSize_valueChanged(double arg1);
   void on_scannerType_currentIndexChanged(int index);
   void on_v2ScanMode_stateChanged(int arg1);
+  void on_normalThresh_valueChanged(double arg1);
+  void on_distanceThresh_valueChanged(double arg1);
+  void on_raycastNearPlane_valueChanged(double arg1);
+  void on_raycastFarPlane_valueChanged(double arg1);
 };
 
 #endif // MAINWINDOW_H
