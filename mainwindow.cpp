@@ -18,6 +18,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFileDialog>
 #include <QGLContext>
 #include <QOpenGLWidget>
 #include <QtWidgets>
@@ -134,11 +135,24 @@ MainWindow::setupRoux()
   // Remove the new line characters
   license_str.erase(std::remove(license_str.begin(), license_str.end(), '\n'),
                     license_str.end());
-  m_roux->setLicense(license_str);
+  std::cout << "Setting license to: " << license_path << ":\n\t" << license_str
+            << std::endl;
+  auto status = m_roux->setLicense(license_str);
+  if (status != Status::SUCCESS) {
+    std::cerr << "Error setting Roux License!" << getStatusString(status)
+              << std::endl;
+  }
   std::string model_path = DEPS_DIR_PATH "/models/scandy-4.obj";
   std::string texture_path = DEPS_DIR_PATH "/models/scandy-texture-4.png";
   if (FileOps::FileExists(model_path)) {
     m_roux->loadMesh(model_path, texture_path);
+  }
+
+  // Setup our ScannerType options
+  ScannerType s = ScannerType::UNKNOWN;
+  while (s != ScannerType::LAST) {
+    ui->scannerType->addItem(QString(getScannerTypeString(s)));
+    s = (ScannerType)((int)s + 1);
   }
 }
 
@@ -148,9 +162,11 @@ MainWindow::on_initButton_clicked()
   std::cout << "on_initButton_clicked" << std::endl;
   // Get from combo box
   ScannerType scanner_type = ScannerType::FILE;
-  std::string dir_path = "/tmp/etouffe_input/";
+  std::string dir_path = m_sc_config->m_scan_dir_path;
+  m_sc_config->m_scan_dir_path = "/tmp/etouffe";
 
-  m_sc_config->m_use_unbounded = ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
+  m_sc_config->m_use_unbounded =
+    ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
 
   auto status = m_roux->initializeScanner(scanner_type, dir_path);
   std::cout << "init " << getStatusString(status) << std::endl;
@@ -193,7 +209,10 @@ MainWindow::on_saveButton_clicked()
 {
   std::cout << "on_saveButton_clicked" << std::endl;
   MeshExportOptions opts;
+  // TODO: allow setting of this through the UI
   opts.m_dst_file_path = "/tmp/etouffee.ply";
+  opts.m_decimate = 0.1;
+  opts.m_smoothing = 3;
   auto status = m_roux->exportMesh(opts);
   std::cout << "save " << getStatusString(status) << std::endl;
 }
@@ -213,10 +232,49 @@ MainWindow::on_voxelSize_valueChanged(double arg1)
 void
 MainWindow::on_scannerType_currentIndexChanged(int index)
 {
-  std::cout << "on_scannerType_currentIndexChanged: " << index << std::endl;
+  std::cout
+    << "on_scannerType_currentIndexChanged: "
+    << ui->scannerType->itemText(ui->scannerType->currentIndex()).toStdString()
+    << std::endl;
+  m_sc_config->m_scanner_type = (ScannerType)ui->scannerType->currentIndex();
+  if (m_sc_config->m_scanner_type == ScannerType::FILE) {
+    std::string home_dir = getenv("HOME");
+    QString dir = QFileDialog::getExistingDirectory(
+      this,
+      tr("Open Directory"),
+      QString(home_dir.c_str()),
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    m_sc_config->m_scan_dir_path = dir.toStdString();
+  }
 }
 
-void MainWindow::on_v2ScanMode_stateChanged(int arg1)
+void
+MainWindow::on_v2ScanMode_stateChanged(int arg1)
 {
-    m_sc_config->m_use_unbounded = ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
+  m_sc_config->m_use_unbounded =
+    ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
+}
+
+void
+MainWindow::on_normalThresh_valueChanged(double arg1)
+{
+  m_sc_config->m_normal_threshold = (float)arg1;
+}
+
+void
+MainWindow::on_distanceThresh_valueChanged(double arg1)
+{
+  m_sc_config->m_dist_threshold = (float)arg1;
+}
+
+void
+MainWindow::on_raycastNearPlane_valueChanged(double arg1)
+{
+  m_sc_config->m_raycast_near_plane = (float)arg1;
+}
+
+void
+MainWindow::on_raycastFarPlane_valueChanged(double arg1)
+{
+  m_sc_config->m_raycast_far_plane = (float)arg1;
 }
