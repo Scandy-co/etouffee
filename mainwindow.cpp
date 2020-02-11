@@ -18,23 +18,24 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QVTKOpenGLNativeWidget.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkLight.h>
+#include <vtkNew.h>
+#include <vtkSmartPointer.h>
+
 #include <QFileDialog>
 #include <QGLContext>
 #include <QOpenGLWidget>
 #include <QtWidgets>
 #include <iostream>
 
-#include <QVTKOpenGLNativeWidget.h>
-#include <vtkGenericOpenGLRenderWindow.h>
-#include <vtkNew.h>
-#include <vtkSmartPointer.h>
-
 #include <scandy/utilities/FileOps.h>
 
 #include <scandy/core/IScandyCore.h>
 #include <scandy/core/MeshExportOptions.h>
 #include <scandy/core/ScannerType.h>
-
+#include <scandy/core/visualizer/MeshViewport.h>
 
 // These need to be last since Xlib.h #define Status 1
 #if LINUX
@@ -121,15 +122,6 @@ MainWindow::setupRoux()
 
   m_sc_config = m_roux->getIScandyCoreConfiguration();
 
-  std::string default_sc_config_path = getenv("HOME");
-  default_sc_config_path += "/.sc_config.json";
-  auto sc_config = m_roux->loadIScandyCoreConfiguration(default_sc_config_path);
-  if( sc_config ){
-    m_sc_config = sc_config;
-    // TODO: populate ui with values loaded from config
-    // ui->ray
-  }
-
   // setup timer to update window every 25ms
   // remember vtk must be update in main ui thread
   if (m_render_timer != nullptr) {
@@ -149,8 +141,8 @@ MainWindow::setupRoux()
   // Remove the new line characters
   license_str.erase(std::remove(license_str.begin(), license_str.end(), '\n'),
                     license_str.end());
-  std::cout << "Setting license from: " << license_path << ":\n\t" << license_str
-            << std::endl;
+  std::cout << "Setting license from: " << license_path << ":\n\t"
+            << license_str << std::endl;
   auto status = m_roux->setLicense(license_str);
   if (status != scandy::core::Status::SUCCESS) {
     std::cerr << "Error setting Roux License!" << getStatusString(status)
@@ -169,6 +161,16 @@ MainWindow::setupRoux()
     ui->scannerType->addItem(QString(getScannerTypeString(s)));
     s = (ScannerType)((int)s + 1);
   }
+
+  // Load the default sc_config from $HOME/.sc_config.json
+  std::string default_sc_config_path = getenv("HOME");
+  default_sc_config_path += "/.sc_config.json";
+  auto sc_config = m_roux->loadIScandyCoreConfiguration(default_sc_config_path);
+  if (sc_config) {
+    m_sc_config = sc_config;
+    // TODO: populate ui with values loaded from config
+    // ui->ray
+  }
 }
 
 void
@@ -176,12 +178,13 @@ MainWindow::on_initButton_clicked()
 {
   std::cout << "on_initButton_clicked" << std::endl;
   std::string dir_path = m_sc_config->m_scan_dir_path;
-  m_sc_config->m_scan_dir_path = "/tmp/etouffe";
+  m_sc_config->m_scan_dir_path = "/tmp/etouffee";
 
   m_sc_config->m_use_unbounded =
     ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
 
-  auto status = m_roux->initializeScanner(m_sc_config->m_scanner_type, dir_path);
+  auto status =
+    m_roux->initializeScanner(m_sc_config->m_scanner_type, dir_path);
   std::cout << "init " << getStatusString(status) << std::endl;
 }
 
@@ -216,9 +219,9 @@ MainWindow::on_meshButton_clicked()
 {
   std::cout << "on_meshButton_clicked" << std::endl;
   auto status = m_roux->generateMesh();
-  // m_roux->smoothMesh(3);
-  // m_roux->reverseNormals();
-  // m_roux->applyEditsFromMeshViewport(true);
+  // SceneLight works for Qt. Our default SetLightTypeToCameraLight does not
+  // seem to work well
+  m_roux->getMeshViewport()->m_light->SetLightTypeToSceneLight();
   std::cout << "mesh " << getStatusString(status) << std::endl;
 }
 
@@ -229,8 +232,6 @@ MainWindow::on_saveButton_clicked()
   MeshExportOptions opts;
   // TODO: allow setting of this through the UI
   opts.m_dst_file_path = "/tmp/etouffee.ply";
-  opts.m_decimate = 0.1;
-  opts.m_smoothing = 3;
   auto status = m_roux->exportMesh(opts);
   std::cout << "save " << getStatusString(status) << std::endl;
 }
@@ -238,13 +239,13 @@ MainWindow::on_saveButton_clicked()
 void
 MainWindow::on_scanSize_valueChanged(double arg1)
 {
-  m_roux->setScanSize((float)arg1);
+  m_roux->setScanSize((float)arg1, false);
 }
 
 void
 MainWindow::on_voxelSize_valueChanged(double arg1)
 {
-  m_roux->setVoxelSize((float)arg1 * 1e-3);
+  m_roux->setVoxelSize((float)arg1 * 1e-3, false);
 }
 
 void
