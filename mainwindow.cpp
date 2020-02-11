@@ -142,12 +142,13 @@ MainWindow::setupRoux()
 
   // Read the license from file
   std::string license_path = DEPS_DIR_PATH "/roux_license.txt";
-  std::string license_str =
-    (char*)FileOps::ReadDataFromFile<uchar>(license_path).data();
+  std::vector<char> license_data =
+    FileOps::ReadDataFromFile<char>(license_path);
+  // convert the std::vector to a std::string
+  std::string license_str(license_data.begin(), license_data.end());
   // Remove the new line characters
   license_str.erase(std::remove(license_str.begin(), license_str.end(), '\n'),
                     license_str.end());
-  license_str.shrink_to_fit();
   std::cout << "Setting license to: " << license_path << ":\n\t" << license_str
             << std::endl;
   auto status = m_roux->setLicense(license_str);
@@ -215,9 +216,9 @@ MainWindow::on_meshButton_clicked()
 {
   std::cout << "on_meshButton_clicked" << std::endl;
   auto status = m_roux->generateMesh();
-  m_roux->smoothMesh(3);
-  m_roux->reverseNormals(true);
-  m_roux->applyEditsFromMeshViewport(true);
+  // m_roux->smoothMesh(3);
+  // m_roux->reverseNormals();
+  // m_roux->applyEditsFromMeshViewport(true);
   std::cout << "mesh " << getStatusString(status) << std::endl;
 }
 
