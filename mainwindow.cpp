@@ -121,6 +121,15 @@ MainWindow::setupRoux()
 
   m_sc_config = m_roux->getIScandyCoreConfiguration();
 
+  std::string default_sc_config_path = getenv("HOME");
+  default_sc_config_path += "/.sc_config.json";
+  auto sc_config = m_roux->loadIScandyCoreConfiguration(default_sc_config_path);
+  if( sc_config ){
+    m_sc_config = sc_config;
+    // TODO: populate ui with values loaded from config
+    // ui->ray
+  }
+
   // setup timer to update window every 25ms
   // remember vtk must be update in main ui thread
   if (m_render_timer != nullptr) {
@@ -138,12 +147,14 @@ MainWindow::setupRoux()
   // Remove the new line characters
   license_str.erase(std::remove(license_str.begin(), license_str.end(), '\n'),
                     license_str.end());
+  license_str.shrink_to_fit();
   std::cout << "Setting license to: " << license_path << ":\n\t" << license_str
             << std::endl;
   auto status = m_roux->setLicense(license_str);
   if (status != scandy::core::Status::SUCCESS) {
     std::cerr << "Error setting Roux License!" << getStatusString(status)
               << std::endl;
+    exit((int)Status::INVALID_LICENSE);
   }
   std::string model_path = DEPS_DIR_PATH "/models/scandy-4.obj";
   std::string texture_path = DEPS_DIR_PATH "/models/scandy-texture-4.png";
@@ -186,6 +197,8 @@ MainWindow::on_startButton_clicked()
 {
   std::cout << "on_startButton_clicked" << std::endl;
   auto status = m_roux->startScanning();
+  // Save the current scan configuration for future reference
+  IScandyCoreConfiguration::SaveToDir(m_sc_config);
   std::cout << "start " << getStatusString(status) << std::endl;
 }
 
@@ -203,7 +216,7 @@ MainWindow::on_meshButton_clicked()
   std::cout << "on_meshButton_clicked" << std::endl;
   auto status = m_roux->generateMesh();
   m_roux->smoothMesh(3);
-  m_roux->reverseNormals();
+  m_roux->reverseNormals(true);
   m_roux->applyEditsFromMeshViewport(true);
   std::cout << "mesh " << getStatusString(status) << std::endl;
 }
@@ -230,7 +243,7 @@ MainWindow::on_scanSize_valueChanged(double arg1)
 void
 MainWindow::on_voxelSize_valueChanged(double arg1)
 {
-  m_roux->setVoxelSize((float)arg1);
+  m_roux->setVoxelSize((float)arg1 * 1e-3);
 }
 
 void
