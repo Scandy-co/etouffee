@@ -149,7 +149,7 @@ MainWindow::setupRoux()
   // Remove the new line characters
   license_str.erase(std::remove(license_str.begin(), license_str.end(), '\n'),
                     license_str.end());
-  std::cout << "Setting license to: " << license_path << ":\n\t" << license_str
+  std::cout << "Setting license from: " << license_path << ":\n\t" << license_str
             << std::endl;
   auto status = m_roux->setLicense(license_str);
   if (status != scandy::core::Status::SUCCESS) {
