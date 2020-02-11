@@ -204,7 +204,7 @@ MainWindow::on_meshButton_clicked()
   auto status = m_roux->generateMesh();
   m_roux->smoothMesh(3);
   m_roux->reverseNormals();
-  m_roux->applyEditsFromMeshViewport();
+  m_roux->applyEditsFromMeshViewport(true);
   std::cout << "mesh " << getStatusString(status) << std::endl;
 }
 
