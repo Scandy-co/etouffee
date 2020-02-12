@@ -67,7 +67,7 @@ cmake \
 ### build
 
 ```bash
-cmake --build . -j $JOBS
+cmake --build . -- -j $JOBS
 ```
 
 ## Run
