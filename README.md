@@ -32,6 +32,7 @@ sudo apt install -y \
   qt5-default \
   qtcreator \
   libqt5x11extras5-dev \
+  libqt5opengl5-dev \
   qt5-style-plugins \
   qttools5-dev
 ```
