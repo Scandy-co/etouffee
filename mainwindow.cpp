@@ -230,8 +230,11 @@ MainWindow::on_saveButton_clicked()
 {
   std::cout << "on_saveButton_clicked" << std::endl;
   MeshExportOptions opts;
-  // TODO: allow setting of this through the UI
-  opts.m_dst_file_path = "/tmp/etouffee.ply";
+
+  // Get the file path from the user via dialog
+  QString file_path = QFileDialog::getSaveFileName();
+  opts.m_dst_file_path = file_path.toStdString();
+  
   auto status = m_roux->exportMesh(opts);
   std::cout << "save " << getStatusString(status) << std::endl;
 }
