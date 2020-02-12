@@ -176,13 +176,13 @@ MainWindow::setupRoux()
 void
 MainWindow::on_initButton_clicked()
 {
-  std::cout << "on_initButton_clicked" << std::endl;
   std::string dir_path = m_sc_config->m_scan_dir_path;
   m_sc_config->m_scan_dir_path = "/tmp/etouffee";
 
   m_sc_config->m_use_unbounded =
     ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
 
+  std::cout << "on_initButton_clicked: " << getScannerTypeString(m_sc_config->m_scanner_type) << " " << dir_path << std::endl;
   auto status =
     m_roux->initializeScanner(m_sc_config->m_scanner_type, dir_path);
   std::cout << "init " << getStatusString(status) << std::endl;
