@@ -81,5 +81,5 @@ export LD_LIBRARY_PATH=$PWD:$PWD/lib:$Roux_DIR/lib
 ### run
 
 ```bash
-./Etouffee
+./EtouffeeApp
 ```
