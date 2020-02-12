@@ -25,7 +25,15 @@ brew install qt
 linux:
 
 ```bash
-sudo apt install qt5
+sudo apt install -y \
+  build-essential \
+  clang \
+  cmake \
+  qt5-default \
+  qtcreator \
+  libqt5x11extras5-dev \
+  qt5-style-plugins \
+  qttools5-dev
 ```
 
 ## Build
