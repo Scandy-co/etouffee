@@ -35,6 +35,8 @@ set(CMAKE_CC_COMPILER "clang")
 
 project(Etouffee)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${Etouffee_SOURCE_DIR}")
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fpermissive -Werror=return-type")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
@@ -55,7 +57,7 @@ find_package(
   PATHS "$ENV{ScandyCore_DIR}" "$ENV{Roux_DIR}"
 )
 include_directories(${Roux_INCLUDE_DIRS})
-
+message("Using Roux ${Roux_VERSION}")
 
 # Make sure we've got Qt setup
 if(LINUX)
@@ -82,6 +84,7 @@ add_definitions(-DDEPS_DIR_PATH="${Etouffee_SOURCE_DIR}/dependencies/")
 
 # Setup the Etouffee App
 if( APPLE )
+  # Roux for macOS is currently not shipping with OpenCV
   find_package(OpenCV)
   include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -126,9 +129,22 @@ else()
   )
 endif()
 
+# Link the executable to all the things
 target_link_libraries( EtouffeeApp
   Qt5::Core
   Qt5::Widgets
   Qt5::OpenGL
   ${Roux_LIBS}
+)
+
+# Setup package and installation 
+include(Distribution)
+
+install(
+  TARGETS EtouffeeApp
+  DESTINATION .
+)
+install(
+  FILES ${Roux_LIBS}
+  DESTINATION lib
 )
