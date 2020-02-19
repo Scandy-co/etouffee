@@ -21,7 +21,7 @@ class MainWindow;
 
 class MainWindow : public QMainWindow
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   explicit MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
@@ -50,6 +50,10 @@ protected slots:
   void on_distanceThresh_valueChanged(double arg1);
   void on_raycastNearPlane_valueChanged(double arg1);
   void on_raycastFarPlane_valueChanged(double arg1);
+  void on_selectDirectory_clicked();
+  void on_saveInput_stateChanged(int arg1);
+  void on_sensorUnits_activated(int index);
+  void on_scanningUnits_activated(int index);
 };
 
 #endif // MAINWINDOW_H

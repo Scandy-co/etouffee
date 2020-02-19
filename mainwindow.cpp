@@ -48,12 +48,13 @@
 using namespace scandy::core;
 using namespace scandy::utilities;
 
-std::shared_ptr<scandy::core::IScandyCore> m_roux;
-std::shared_ptr<scandy::core::IScandyCoreConfiguration> m_sc_config;
+static std::shared_ptr<scandy::core::IScandyCore> m_roux;
+static std::shared_ptr<scandy::core::IScandyCoreConfiguration> m_sc_config;
+static std::string file_dir = "";
 
 // VTK must be rendered from main user interface thread
-QTimer* m_render_timer;
-const int m_render_timeout_ms = 25;
+static QTimer* m_render_timer;
+static const int m_render_timeout_ms = 25;
 
 MainWindow::MainWindow(QWidget* parent)
   : QMainWindow(parent)
@@ -162,29 +163,47 @@ MainWindow::setupRoux()
     s = (ScannerType)((int)s + 1);
   }
 
-  // Load the default sc_config from $HOME/.sc_config.json
-  std::string default_sc_config_path = getenv("HOME");
-  default_sc_config_path += "/.sc_config.json";
+  IScandyCoreConfiguration::Units u = (IScandyCoreConfiguration::Units)0;
+  while (u != IScandyCoreConfiguration::Units::OTHER) {
+    QString unit = QString(IScandyCoreConfiguration::GetUnitString(u).c_str());
+    ui->sensorUnits->addItem(unit);
+    ui->scanningUnits->addItem(unit);
+    u = (IScandyCoreConfiguration::Units)((int)u + 1);
+  }
+
+  ui->sensorUnits->setCurrentIndex((int)IScandyCoreConfiguration::Units::M);
+  ui->scanningUnits->setCurrentIndex((int)IScandyCoreConfiguration::Units::M);
+
+  // Set the default output path to $HOME/Etouffee
+  m_sc_config->m_scan_dir_path = getenv("HOME") + std::string("/Etouffee");
+  FileOps::EnsureDirectory(m_sc_config->m_scan_dir_path);
+
+  // Load the default sc_config from $HOME/Etouffee/.sc_config.json
+  std::string default_sc_config_path = m_sc_config->m_scan_dir_path;
+  default_sc_config_path += "/sc_config.json";
   auto sc_config = m_roux->loadIScandyCoreConfiguration(default_sc_config_path);
   if (sc_config) {
     m_sc_config = sc_config;
     // TODO: populate ui with values loaded from config
     // ui->ray
   }
+
+  // TODO: Update this to a timestamped entry
+  m_sc_config->m_scan_dir_path = getenv("HOME") + std::string("/Etouffee");
+  ui->outputDirectory->setText(QString(m_sc_config->m_scan_dir_path.c_str()));
 }
 
 void
 MainWindow::on_initButton_clicked()
 {
-  std::string dir_path = m_sc_config->m_scan_dir_path;
-  m_sc_config->m_scan_dir_path = "/tmp/etouffee";
-
   m_sc_config->m_use_unbounded =
     ui->v2ScanMode->checkState() == Qt::CheckState::Checked;
 
-  std::cout << "on_initButton_clicked: " << getScannerTypeString(m_sc_config->m_scanner_type) << " " << dir_path << std::endl;
+  std::cout << "on_initButton_clicked: "
+            << getScannerTypeString(m_sc_config->m_scanner_type) << " "
+            << file_dir << std::endl;
   auto status =
-    m_roux->initializeScanner(m_sc_config->m_scanner_type, dir_path);
+    m_roux->initializeScanner(m_sc_config->m_scanner_type, file_dir);
   std::cout << "init " << getStatusString(status) << std::endl;
 }
 
@@ -200,9 +219,14 @@ void
 MainWindow::on_startButton_clicked()
 {
   std::cout << "on_startButton_clicked" << std::endl;
+  // Make sure we can save our output to the dir we are outputting to
+  FileOps::EnsureDirectory(m_sc_config->m_scan_dir_path);
   auto status = m_roux->startScanning();
+  std::stringstream sc_config_path;
+  auto epoch = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  sc_config_path << m_sc_config->m_scan_dir_path << "/sc_config." << epoch << ".json";
   // Save the current scan configuration for future reference
-  IScandyCoreConfiguration::SaveToDir(m_sc_config);
+  IScandyCoreConfiguration::SaveToPath(m_sc_config, sc_config_path.str());
   std::cout << "start " << getStatusString(status) << std::endl;
 }
 
@@ -221,7 +245,7 @@ MainWindow::on_meshButton_clicked()
   auto status = m_roux->generateMesh();
   // SceneLight works for Qt. Our default SetLightTypeToCameraLight does not
   // seem to work well
-  m_roux->getMeshViewport()->m_light->SetLightTypeToSceneLight();
+  //  m_roux->getMeshViewport()->m_light->SetLightTypeToSceneLight();
   std::cout << "mesh " << getStatusString(status) << std::endl;
 }
 
@@ -234,7 +258,7 @@ MainWindow::on_saveButton_clicked()
   // Get the file path from the user via dialog
   QString file_path = QFileDialog::getSaveFileName();
   opts.m_dst_file_path = file_path.toStdString();
-  
+
   auto status = m_roux->exportMesh(opts);
   std::cout << "save " << getStatusString(status) << std::endl;
 }
@@ -248,7 +272,7 @@ MainWindow::on_scanSize_valueChanged(double arg1)
 void
 MainWindow::on_voxelSize_valueChanged(double arg1)
 {
-  m_roux->setVoxelSize((float)arg1 * 1e-3, false);
+  m_roux->setVoxelSize((float)(arg1 * 1e-3), false);
 }
 
 void
@@ -260,13 +284,12 @@ MainWindow::on_scannerType_currentIndexChanged(int index)
     << std::endl;
   m_sc_config->m_scanner_type = (ScannerType)ui->scannerType->currentIndex();
   if (m_sc_config->m_scanner_type == ScannerType::FILE) {
-    std::string home_dir = getenv("HOME");
     QString dir = QFileDialog::getExistingDirectory(
       this,
       tr("Open Directory"),
-      QString(home_dir.c_str()),
+      QString(m_sc_config->m_scan_dir_path.c_str()),
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    m_sc_config->m_scan_dir_path = dir.toStdString();
+    file_dir = dir.toStdString();
   }
 }
 
@@ -299,4 +322,43 @@ void
 MainWindow::on_raycastFarPlane_valueChanged(double arg1)
 {
   m_sc_config->m_raycast_far_plane = (float)arg1;
+}
+
+void
+MainWindow::on_selectDirectory_clicked()
+{
+  QString startDir = QString(m_sc_config->m_scan_dir_path.c_str());
+  QString dir = QFileDialog::getExistingDirectory(
+    this,
+    tr("Open Directory"),
+    startDir,
+    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+  m_sc_config->m_scan_dir_path = dir.toStdString();
+}
+
+void
+MainWindow::on_saveInput_stateChanged(int arg1)
+{
+  m_sc_config->m_save_input_images =
+    ui->saveInput->checkState() == Qt::CheckState::Checked;
+}
+
+void
+MainWindow::on_sensorUnits_activated(int index)
+{
+  IScandyCoreConfiguration::Units sensorUnits =
+    (IScandyCoreConfiguration::Units)ui->sensorUnits->currentIndex();
+  IScandyCoreConfiguration::Units scanningUnits =
+    (IScandyCoreConfiguration::Units)ui->scanningUnits->currentIndex();
+  m_sc_config->setUnits(sensorUnits, scanningUnits);
+}
+
+void
+MainWindow::on_scanningUnits_activated(int index)
+{
+  IScandyCoreConfiguration::Units sensorUnits =
+    (IScandyCoreConfiguration::Units)ui->sensorUnits->currentIndex();
+  IScandyCoreConfiguration::Units scanningUnits =
+    (IScandyCoreConfiguration::Units)ui->scanningUnits->currentIndex();
+  m_sc_config->setUnits(sensorUnits, scanningUnits);
 }
