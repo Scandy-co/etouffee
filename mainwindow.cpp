@@ -210,8 +210,8 @@ MainWindow::on_initButton_clicked()
     m_roux->initializeScanner(m_sc_config->m_scanner_type, file_dir);
   std::cout << "init " << getStatusString(status) << std::endl;
 
-  m_sc_config->m_raycast_far_plane = far;
-  m_sc_config->m_raycast_near_plane = near;
+  m_sc_config->setFarPlane(far);
+  m_sc_config->setNearPlane(near);
 }
 
 void
@@ -325,13 +325,13 @@ MainWindow::on_distanceThresh_valueChanged(double arg1)
 void
 MainWindow::on_raycastNearPlane_valueChanged(double arg1)
 {
-  m_sc_config->m_raycast_near_plane = (float)arg1;
+  m_sc_config->setNearPlane((float)arg1);
 }
 
 void
 MainWindow::on_raycastFarPlane_valueChanged(double arg1)
 {
-  m_sc_config->m_raycast_far_plane = (float)arg1;
+  m_sc_config->setFarPlane((float)arg1);
 }
 
 void
