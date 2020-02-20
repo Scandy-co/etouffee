@@ -73,7 +73,7 @@
           <rect>
            <x>0</x>
            <y>10</y>
-           <width>202</width>
+           <width>205</width>
            <height>351</height>
           </rect>
          </property>
@@ -101,10 +101,10 @@
           <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="voxelSize">
             <property name="decimals">
-             <number>3</number>
+             <number>4</number>
             </property>
             <property name="minimum">
-             <double>0.100000000000000</double>
+             <double>0.000100000000000</double>
             </property>
             <property name="maximum">
              <double>1000.000000000000000</double>
@@ -113,7 +113,7 @@
              <double>0.100000000000000</double>
             </property>
             <property name="value">
-             <double>1.000000000000000</double>
+             <double>0.001000000000000</double>
             </property>
            </widget>
           </item>

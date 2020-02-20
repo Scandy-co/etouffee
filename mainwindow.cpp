@@ -202,9 +202,16 @@ MainWindow::on_initButton_clicked()
   std::cout << "on_initButton_clicked: "
             << getScannerTypeString(m_sc_config->m_scanner_type) << " "
             << file_dir << std::endl;
+
+  // Roux currently resets these on init
+  const float far = m_sc_config->m_raycast_far_plane;
+  const float near = m_sc_config->m_raycast_near_plane;
   auto status =
     m_roux->initializeScanner(m_sc_config->m_scanner_type, file_dir);
   std::cout << "init " << getStatusString(status) << std::endl;
+
+  m_sc_config->m_raycast_far_plane = far;
+  m_sc_config->m_raycast_near_plane = near;
 }
 
 void
@@ -223,8 +230,11 @@ MainWindow::on_startButton_clicked()
   FileOps::EnsureDirectory(m_sc_config->m_scan_dir_path);
   auto status = m_roux->startScanning();
   std::stringstream sc_config_path;
-  auto epoch = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-  sc_config_path << m_sc_config->m_scan_dir_path << "/sc_config." << epoch << ".json";
+  auto epoch = std::chrono::duration_cast<std::chrono::microseconds>(
+                 std::chrono::system_clock::now().time_since_epoch())
+                 .count();
+  sc_config_path << m_sc_config->m_scan_dir_path << "/sc_config." << epoch
+                 << ".json";
   // Save the current scan configuration for future reference
   IScandyCoreConfiguration::SaveToPath(m_sc_config, sc_config_path.str());
   std::cout << "start " << getStatusString(status) << std::endl;
@@ -272,7 +282,7 @@ MainWindow::on_scanSize_valueChanged(double arg1)
 void
 MainWindow::on_voxelSize_valueChanged(double arg1)
 {
-  m_roux->setVoxelSize((float)(arg1 * 1e-3), false);
+  m_roux->setVoxelSize((float)(arg1), false);
 }
 
 void
