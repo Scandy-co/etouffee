@@ -29,6 +29,7 @@
 #include <QOpenGLWidget>
 #include <QtWidgets>
 #include <iostream>
+#include <vtksys/SystemTools.hxx>
 
 #include <scandy/utilities/FileOps.h>
 
@@ -134,7 +135,8 @@ MainWindow::setupRoux()
   m_render_timer->start(m_render_timeout_ms);
 
   // Read the license from file
-  std::string license_path = DEPS_DIR_PATH "/roux_license.txt";
+  std::string license_path =
+    vtksys::SystemTools::GetCurrentWorkingDirectory() + "/roux_license.txt";
   std::vector<char> license_data =
     FileOps::ReadDataFromFile<char>(license_path);
   // convert the std::vector to a std::string
@@ -204,8 +206,8 @@ MainWindow::on_initButton_clicked()
             << file_dir << std::endl;
 
   // Roux currently resets these on init
-  const float far = m_sc_config->m_raycast_far_plane;
-  const float near = m_sc_config->m_raycast_near_plane;
+  const float far = m_sc_config->getFarPlane();
+  const float near = m_sc_config->getNearPlane();
   auto status =
     m_roux->initializeScanner(m_sc_config->m_scanner_type, file_dir);
   std::cout << "init " << getStatusString(status) << std::endl;
