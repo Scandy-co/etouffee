@@ -57,7 +57,7 @@ find_package(
   PATHS "$ENV{ScandyCore_DIR}" "$ENV{Roux_DIR}"
 )
 include_directories(${Roux_INCLUDE_DIRS})
-message("Using Roux ${Roux_VERSION}")
+message("Using Roux ${Roux_VERSION_FULL}")
 
 # Make sure we've got Qt setup
 if(LINUX)
