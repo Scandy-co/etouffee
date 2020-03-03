@@ -88,6 +88,7 @@ export LD_LIBRARY_PATH=$PWD:$PWD/lib:$Roux_DIR/lib
 ```
 
 ### run
+You should be in the build directory already.
 
 ```bash
 ./EtouffeeApp
