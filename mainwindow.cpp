@@ -161,7 +161,10 @@ MainWindow::setupRoux()
   // Setup our ScannerType options
   ScannerType s = ScannerType::UNKNOWN;
   while (s != ScannerType::LAST) {
-    ui->scannerType->addItem(QString(getScannerTypeString(s)));
+    std::string str = getScannerTypeString(s);
+    if( !str.empty() || (int)s == 0 ){
+      ui->scannerType->addItem(QString(str.c_str()));
+    }
     s = (ScannerType)((int)s + 1);
   }
 
