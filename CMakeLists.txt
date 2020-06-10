@@ -113,6 +113,14 @@ if( APPLE )
 
   # Set the executable path APPLE
   set(QMAKE_LFLAGS_SONAME="-Wl,-install_name,@executable_path/")
+
+  # copy the dylibs after build
+  add_custom_command(
+    TARGET EtouffeeApp
+    POST_BUILD
+    COMMAND
+      rsync -a ${Roux_LIB_DIRS}/*.dylib* "${CMAKE_CURRENT_BINARY_DIR}/\${CONFIGURATION}"
+  )
 else()
   find_package(OpenCL REQUIRED )
   include_directories(${OpenCL_INCLUDE_DIRS})
